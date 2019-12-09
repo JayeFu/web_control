@@ -17,10 +17,10 @@ function Robot(ros, index) {
                   ros : this.ros,
                   name : '/cmd_vel',
                   messageType : 'geometry_msgs/Twist'
-                })
+                });
                 
   this.cmdVel.subscribe(function(message) {
-                        document.getElementById('mainForm').rows[index+1].cells[3].innerHTML = message.linear.x;
+                        document.getElementById('mainForm').rows[index+1].cells[3].innerHTML = "("+message.linear.x+","+message.linear.y+","+message.angular.z+")";
                      });
                 
   this.role = new ROSLIB.Topic({
@@ -31,8 +31,16 @@ function Robot(ros, index) {
   this.role.subscribe(function(message) {
                         document.getElementById('mainForm').rows[index+1].cells[2].innerHTML = message.data;
                      });
-  
-  
+                     
+  this.ballPos = new ROSLIB.Topic({
+                   ros : this.ros,
+                   name : '/ball_pos',
+                   messageType : 'geometry_msgs/Point'
+                 });
+                 
+  this.ballPos.subscribe(function(message) {
+                           document.getElementById('mainForm').rows[index+1].cells[4].innerHTML = "("+message.x+","+message.y+")";
+                        });
 }
 
 </script>
@@ -42,8 +50,6 @@ function Robot(ros, index) {
   // -----------------
   
   var robots = [];
-  var cmdVels = [];
-  var roles = [];
 
   function addRobot() {
     var URL = document.getElementById("url").value
