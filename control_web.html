@@ -6,6 +6,37 @@
 <script type="text/javascript" src="http://static.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
 <script type="text/javascript" src="http://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
 
+
+<script type="text/javascript" type="text/javascript">
+// class definition
+
+function Robot(ros, index) {
+  this.ros = ros;
+  
+  this.cmdVel = new ROSLIB.Topic({
+                  ros : this.ros,
+                  name : '/cmd_vel',
+                  messageType : 'geometry_msgs/Twist'
+                })
+                
+  this.cmdVel.subscribe(function(message) {
+                        document.getElementById('mainForm').rows[index+1].cells[3].innerHTML = message.linear.x;
+                     });
+                
+  this.role = new ROSLIB.Topic({
+                ros : this.ros,
+                name : '/role',
+                messageType : 'std_msgs/String'
+              });
+  this.role.subscribe(function(message) {
+                        document.getElementById('mainForm').rows[index+1].cells[2].innerHTML = message.data;
+                     });
+  
+  
+}
+
+</script>
+
 <script type="text/javascript" type="text/javascript">
   // Connecting to ROS
   // -----------------
@@ -18,37 +49,17 @@
     var URL = document.getElementById("url").value
     var num_s = document.getElementById("index").value
     var num = Number(num_s)
-    robots.push(new ROSLIB.Ros({url : URL}))
-    robots[num-1].on('connection', function() {
+    var new_robot = new Robot(new ROSLIB.Ros({url : URL}), num-1);
+    new_robot.ros.on('connection', function() {
       document.getElementById('mainForm').rows[num].cells[1].innerHTML = "CONNECTED";
     });
-    robots[num-1].on('error', function(error) {
+    new_robot.ros.on('error', function(error) {
       document.getElementById('mainForm').rows[num].cells[1].innerHTML = "DISCONNECTED";
     });
-    addPub(num-1);
-    addSub(num-1);
+    robots.push(new_robot);
+    document.getElementById("index").value = num+1+"";
   }
   
-  function addPub(index) {
-    cmdVels.push(new ROSLIB.Topic({
-      ros : robots[index],
-      name : '/cmd_vel',
-      messageType : 'geometry_msgs/Twist'
-    }));
-  }
-  
-  function addSub(index) {
-    roles.push(new ROSLIB.Topic({
-      ros : robots[index],
-      name : '/role',
-      messageType : 'std_msgs/String'
-    }));
-    
-    roles[index].subscribe(function(message) {
-      document.getElementById('mainForm').rows[index+1].cells[2].innerHTML = message.data;
-      console.log('Received message on ' + roles[index].name + ': ' + message.data);
-    });
-  }
 </script>
 </head>
 
